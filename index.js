@@ -39,14 +39,37 @@ server.get('/api/users/:id', (req, res) => {
 server.post('/api/users', (req, res) => {
 	const bodyField = req.body;
 	//console.log(bodyField);
+	if (bodyField.name && bodyField.bio) {
+		db
+			.insert(bodyField)
+			.then((idInfo) => {
+				db.findById(idInfo.id).then((user) => {
+					res.status(201).json(user);
+				});
+			})
+			.catch((err) =>
+				res.status(500).json({ error: 'There was an error while saving the user to the database' })
+			);
+	} else {
+		res.status(404).json({ message: 'The user with the specified ID does not exist.' });
+	}
+});
+
+server.delete('/api/users/:id', (req, res) => {
+	const { id } = req.params;
+   //console.log(id);
 	db
-		.insert(bodyField)
-		.then((idInfo) => {
-			db.findById(idInfo.id).then((user) => {
-				res.status(201).json(user);
-			});
+		.remove(id)
+		.then((data) => {
+			if (data) {
+				//delete success
+				res.json({message: "succesfully deleted"});
+			} else {
+				//delete not success
+				res.status(404).json({ message: 'The user with the specified ID does not exist.' });
+			}
 		})
-		.catch((err) => res.status(500).json({ error: 'There was an error while saving the user to the database' }));
+		.catch((err) => res.status(500).json({ error: 'The user could not be removed' }));
 });
 
 server.listen(port, () => console.log(`Server listening on port ${port}`));
