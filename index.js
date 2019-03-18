@@ -24,7 +24,7 @@ server.get('/api/users/:id', (req, res) => {
 	db
 		.findById(id)
 		.then((user) => {
-         //debugger;
+			//debugger;
 			if (user) {
 				res.json(user);
 			} else {
@@ -34,6 +34,19 @@ server.get('/api/users/:id', (req, res) => {
 		.catch((err) => {
 			res.status(500).json({ error: 'The user information could not be retrieved.' });
 		});
+});
+
+server.post('/api/users', (req, res) => {
+	const bodyField = req.body;
+	//console.log(bodyField);
+	db
+		.insert(bodyField)
+		.then((idInfo) => {
+			db.findById(idInfo.id).then((user) => {
+				res.status(201).json(user);
+			});
+		})
+		.catch((err) => res.status(500).json({ error: 'There was an error while saving the user to the database' }));
 });
 
 server.listen(port, () => console.log(`Server listening on port ${port}`));
